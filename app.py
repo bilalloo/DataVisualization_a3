@@ -2,8 +2,17 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# --- Page Config ---
+# --- Page Config & Font Injection ---
 st.set_page_config(layout="wide", page_title="Global Emissions Dashboard")
+
+# Injecting CSS to force the Aptos font across the app
+st.markdown("""
+    <style>
+    html, body, [class*="css"], [class*="st-"] {
+        font-family: 'Aptos', sans-serif !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 # Load and process data
 @st.cache_data
@@ -25,11 +34,14 @@ sector_data = global_data_no_world.groupby('sector')['value'].sum().reset_index(
 highest_sector = sector_data.loc[sector_data['value'].idxmax()]
 
 # --- Aesthetic Customization ---
-# Custom Green-to-Black palette for the pie chart and line chart
-GREEN_BLACK_SCALE = ["#000000", "#00441b", "#238b45", "#41ab5d", "#74c476", "#a1d99b"]
+# Reverted to the original green scale for the pie chart and line chart
+COLOR_SCALE = ["#238b45", "#41ab5d", "#74c476", "#a1d99b", "#c7e9c0", "#e5f5e0"]
+
+# Custom scale for the Bar Chart: Replacing the "white" end of the Greens scale with Black
+BAR_BLACK_GREEN_SCALE = ["#000000", "#74c476", "#238b45", "#00441b"]
 
 # --- Sidebar Controls ---
-st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/2/29/Go-home_copy_%28green_gradient%29.svg", width=100) 
+st.sidebar.image("M.Bilal.png", use_container_width=True)
 st.sidebar.title("Dashboard Controls")
 st.sidebar.markdown("---")
 
@@ -44,7 +56,19 @@ st.sidebar.info(
     f"averaging about **{total_co2/df['date'].nunique():.1f}** units per day tracked."
 )
 
-st.sidebar.markdown("---")
+# Injecting CSS to force the Aptos font but protect Streamlit's icons
+st.markdown("""
+    <style>
+    /* Apply Aptos to standard text elements */
+    html, body, p, div, h1, h2, h3, h4, h5, h6, span, label {
+        font-family: 'Aptos', sans-serif;
+    }
+    /* Force Streamlit's UI icons to stay as icons instead of text */
+    [data-testid="stIconMaterial"], .material-symbols-rounded, svg {
+        font-family: 'Material Symbols Rounded' !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 # 1. Select & Connect
 countries = df[df['country'] != 'WORLD']['country'].unique().tolist()
@@ -78,13 +102,12 @@ with col1:
     # Aggregating for Bar Chart
     bar_data = filtered_df.groupby('country')['value'].sum().sort_values(ascending=False).reset_index()
 
-    # Reconfigure is implicit in Plotly's interactive sorting
     fig_bar = px.bar(
         bar_data,
         x='country',
         y='value',
         color='value',
-        color_continuous_scale=["#a1d99b", "#238b45", "#000000"], # CUSTOM GREEN TO BLACK GRADIENT
+        color_continuous_scale=BAR_BLACK_GREEN_SCALE, # APPLIED BLACK-TO-GREEN HERE
         labels={'value': 'Total CO2 Emissions', 'country': 'Country'},
         template="plotly_white"
     )
@@ -111,7 +134,7 @@ with col2:
             values='value', 
             names='sector', 
             hole=0.6, 
-            color_discrete_sequence=GREEN_BLACK_SCALE, # APPLIED NEW SCALE HERE
+            color_discrete_sequence=COLOR_SCALE, # REVERTED TO GREEN
             template="plotly_white"
         )
         fig_donut.update_traces(textposition='inside', textinfo='percent+label')
@@ -139,7 +162,7 @@ with col3:
         trend_data,
         x='date',
         y='value',
-        color_discrete_sequence=["#000000"], # MADE THE TREND LINE BLACK
+        color_discrete_sequence=[COLOR_SCALE[0]], # REVERTED TO GREEN
         labels={'value': 'Daily Emissions', 'date': 'Date'},
         template="plotly_white"
     )
