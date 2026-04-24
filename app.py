@@ -25,8 +25,8 @@ sector_data = global_data_no_world.groupby('sector')['value'].sum().reset_index(
 highest_sector = sector_data.loc[sector_data['value'].idxmax()]
 
 # --- Aesthetic Customization ---
-# Main chart colors: different shades of green
-COLOR_SCALE = ["#238b45", "#41ab5d", "#74c476", "#a1d99b", "#c7e9c0", "#e5f5e0"]
+# Custom Green-to-Black palette for the pie chart and line chart
+GREEN_BLACK_SCALE = ["#000000", "#00441b", "#238b45", "#41ab5d", "#74c476", "#a1d99b"]
 
 # --- Sidebar Controls ---
 st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/2/29/Go-home_copy_%28green_gradient%29.svg", width=100) 
@@ -84,14 +84,14 @@ with col1:
         x='country',
         y='value',
         color='value',
-        color_continuous_scale="Greens",
+        color_continuous_scale=["#a1d99b", "#238b45", "#000000"], # CUSTOM GREEN TO BLACK GRADIENT
         labels={'value': 'Total CO2 Emissions', 'country': 'Country'},
         template="plotly_white"
     )
     
     fig_bar.update_layout(
         yaxis_type=y_scale_type,
-        xaxis={'categoryorder': 'total descending'} # Default sort
+        xaxis={'categoryorder': 'total descending'} 
     )
     
     st.plotly_chart(fig_bar, use_container_width=True)
@@ -111,7 +111,7 @@ with col2:
             values='value', 
             names='sector', 
             hole=0.6, 
-            color_discrete_sequence=COLOR_SCALE,
+            color_discrete_sequence=GREEN_BLACK_SCALE, # APPLIED NEW SCALE HERE
             template="plotly_white"
         )
         fig_donut.update_traces(textposition='inside', textinfo='percent+label')
@@ -139,7 +139,7 @@ with col3:
         trend_data,
         x='date',
         y='value',
-        color_discrete_sequence=[COLOR_SCALE[0]],
+        color_discrete_sequence=["#000000"], # MADE THE TREND LINE BLACK
         labels={'value': 'Daily Emissions', 'date': 'Date'},
         template="plotly_white"
     )
