@@ -4,6 +4,8 @@ import plotly.express as px
 
 # --- Page Config & Font Injection ---
 st.set_page_config(layout="wide", page_title="Global Emissions Dashboard")
+st.markdown("DS351 - Data Visualization Assignment 3")
+st.markdown("Muhammad Bilal - 2023395 - BDS")
 
 # Injecting CSS to force the Aptos font across the app
 st.markdown("""
